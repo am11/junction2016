@@ -1,28 +1,26 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System;
 
-public class PlayerVisualizer : MonoBehaviour {
+public class PlayerVisualizer : MonoBehaviour
+{
+    public MapCoordinates MapCoords;
+    public UnityCoordinates UnityCoords;
+    public bool Visible;
+    public SpriteRenderer spriteRenderer;
+    // Use this for initialization
+    void Start()
+    {
+        Visible = false;
+        spriteRenderer = GetComponent<SpriteRenderer>();
+    }
 
-	public MapCoordinates MapCoords;
-	public UnityCoordinates UnityCoords;
-	public bool Visible;
-	public SpriteRenderer spriteRenderer;
-	// Use this for initialization
-	void Start ()
-	{
-		Visible = false;
-		spriteRenderer = GetComponent<SpriteRenderer>();
-	}
-	
-	void Update()
-	{
-		spriteRenderer.enabled = Visible;
-	}
+    void Update()
+    {
+        spriteRenderer.enabled = Visible;
+    }
 
-	internal void UpdatePosition()
-	{
-		UnityCoords = CoordinateHelpers.MapCoordinatesToUnity(MapCoords);
-		transform.position = new Vector3(UnityCoords.X,0f, UnityCoords.Y);
-	}
+    internal void UpdatePosition()
+    {
+        UnityCoords = CoordinateHelpers.MapCoordinatesToUnity(MapCoords);
+        transform.position = new Vector3(UnityCoords.X, 0f, UnityCoords.Y);
+    }
 }

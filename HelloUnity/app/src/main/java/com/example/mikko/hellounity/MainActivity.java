@@ -16,7 +16,7 @@ public class MainActivity extends UnityPlayerActivity {
 
     private Proximiio proximiio;
     private ProximiioListener listener;
-    public String positionDataString;
+    public String MapDataString;
 
     @Override
     protected void onStart() {
@@ -25,33 +25,30 @@ public class MainActivity extends UnityPlayerActivity {
         proximiio = ProximiioFactory.getProximiio(UnityPlayer.currentActivity, this);
         listener = new ProximiioListener() {
             @Override
-            public void position(double lat, double lon, double accuracy) {
+            public void position(double latitude, double longitude, double accuracy) {
                 // Do something with the positioning system.
                 // See ProximiioListener in the docs for all available methods.
-                positionDataString = lat + ";" + lon + ";" + accuracy;
+                Log.w("OurJavaDebug", "Position changed: Latitude = " + latitude + "Longitude = " + longitude + "Accuracy = " + accuracy);
+                MapDataString = latitude + ";" + longitude + ";" + accuracy;
             }
+
             @Override
             public void loginFailed(LoginError loginError) {
-                positionDataString = loginError.toString();
                 Log.e("OurJavaError", "LoginError! (" + loginError.toString() + ")");
             }
 
-
+            @Override
+            public void loggedIn(boolean online) {
+                Log.w("OurJavaDebug", "Player login status: " + String.valueOf( online));
+            }
         };
         proximiio.addListener(listener);
-        positionDataString = "Listener added";
         proximiio.setLogin("mikkojniiranen@gmail.com", "okkim123");
-        positionDataString = "Login called";
-
     }
 
     public String GetPositionString()
     {
-        if (positionDataString == null || positionDataString.trim() == "")
-        {
-            return "Position string empty";
-        }
-        return positionDataString;
+        return MapDataString;
     }
     @Override
     protected void onStop() {
