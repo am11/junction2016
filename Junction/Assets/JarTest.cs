@@ -10,7 +10,7 @@ public class JarTest : MonoBehaviour
 		//AndroidJavaClass jc = new AndroidJavaClass("io.proximi.proximiiolibrary");
 		//AndroidJavaObject jo = jc.GetStatic<AndroidJavaObject>("ProximiioFactory");
 		//AndroidJavaObject proxiimio = jo.Call<AndroidJavaObject>("getProximiio",this,null);
-		callShareApp();
+		//callShareApp();
 
 	}
 	string subject = "WORD-O-MAZE";
