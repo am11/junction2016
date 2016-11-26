@@ -70,7 +70,7 @@ public class GameManager : MonoBehaviour
 
 		AndroidJavaClass unity = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
 		AndroidJavaObject currentActivity = unity.GetStatic<AndroidJavaObject>("currentActivity");
-		string positionString = currentActivity.Call<string>("GetPosition");
+		string positionString = currentActivity.Call<string>("GetPositionString");
 		
 		return positionString;
 #else

@@ -1,9 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.example.mikko.hellounity"
-      android:versionCode="1"
-      android:versionName="1.0">
-    <uses-sdk android:minSdkVersion="9" />
+    android:versionCode="53"
+    android:versionName="2.3" >
+    <uses-sdk
+        android:minSdkVersion="18"
+        android:targetSdkVersion="24" />
+		
+		<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <!-- <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" /> -->
+
+    <uses-feature
+        android:name="android.hardware.sensor.accelerometer"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.sensor.compass"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.sensor.gyroscope"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.wifi"
+        android:required="true" />
+    <uses-feature
+        android:name="android.hardware.bluetooth_le"
+        android:required="false" />
+
+		
     <application android:label="@string/app_name">
         <activity android:name=".MainActivity"
                   android:label="@string/app_name">
@@ -12,5 +42,27 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <service
+            android:name="io.proximi.proximiiolibrary.ProximiioService"
+            android:exported="false"
+            android:label="ProximiioService" />
+
+        <!--
+            <service
+            android:name="io.proximi.proximiiolibrary.ProximiioLocationStabilizer"
+            android:exported="false"/>
+        -->
+
+        <service
+            android:name="com.indooratlas.android.sdk.IALocationService"
+            android:exported="false"
+            android:label="IALocationService" />
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="9683000" />
     </application>
+	
+	
 </manifest>
+
