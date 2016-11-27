@@ -1,0 +1,34 @@
+{
+  "bindings": [
+    {
+      "authLevel": "function",
+      "type": "httpTrigger",
+      "direction": "in",
+      "name": "req"
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "$return"
+    },
+    {
+      "type": "documentDB",
+      "name": "inputDocument",
+      "databaseName": "positionDb",
+      "collectionName": "positionInfos",
+      "id": "MyFavoriteDocument",
+      "connection": "<masked>",
+      "direction": "in"
+    },
+    {
+      "type": "documentDB",
+      "name": "outputDocument",
+      "databaseName": "positionDb",
+      "collectionName": "positionInfos",
+      "createIfNotExists": true,
+      "connection": "<masked>",
+      "direction": "out"
+    }
+  ],
+  "disabled": false
+}
