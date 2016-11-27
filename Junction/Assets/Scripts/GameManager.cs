@@ -5,28 +5,31 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    public List<PlayerVisualizer> players;
+    public List<PlayerData> players;
     public PlayerVisualizer LocalPlayer, TargetPlayer;
     private float ownPositionTimer;
     public float ownPositionFrequency;
     public Text DebugText;
     private float nextActionTime = 0.0f;
-    public float period = 0.1f;
+    public float period = 1f;
     public string playerId;
     public string targetId;
-
+	public bool waitingResponse;
+	public float HitDistance = 2.0f;
     // Use this for initialization
     void Start()
     {
-        playerId = "???";
-        targetId = "???";
+        playerId = System.Guid.NewGuid().ToString();
+		if (!waitingResponse)
+		{
+			StartCoroutine(GetAllPositions(new MapCoordinates(0f,0f)));
+		}
 
-        ownPositionTimer = ownPositionFrequency;
-        SetTargetPlayer();
+		ownPositionTimer = ownPositionFrequency;
     }
 
     // Update is called once per frame
-    IEnumerator Update()
+    void Update()
     {
         TargetPlayer.UpdatePosition();
         if (ownPositionTimer <= 0)
@@ -47,17 +50,22 @@ public class GameManager : MonoBehaviour
         if (Time.time > nextActionTime)
         {
             nextActionTime = Time.time + period;
-            yield return GetOpponentPosition(coordinates);
+			if (!waitingResponse)
+			{
+				StartCoroutine(GetOpponentPosition(coordinates));
+			}
         }
 #else
         DebugText.text = GetPosition();
-        yield break;
 #endif
     }
 
     private IEnumerator GetOpponentPosition(MapCoordinates coordinates)
     {
-        WWW www = new WWW("https://ngjunction2016.azurewebsites.net/api/HttpTriggerJS1?code=rVbhaoGvX5L/WNnJQEmMpkPiRNrFykb7aiDBEpF0qv7W4xAE9adbQQ==&playerId=" + playerId + "&latitude=" + coordinates.Latitude + "&longitude=" + coordinates.Longitude + "&accuracy=" + coordinates.Accuracy + "&opponentId=" + targetId);
+		waitingResponse = true;
+		string url = "https://ngjunction2016.azurewebsites.net/api/HttpTriggerJS1?playerId=" + playerId + "&latitude=" + coordinates.Latitude + "&longitude=" + coordinates.Longitude + "&accuracy=" + coordinates.Accuracy + "&opponentId=" + targetId;
+
+		WWW www = new WWW(url);
 
         yield return www;
 
@@ -65,16 +73,21 @@ public class GameManager : MonoBehaviour
         if (www.error == null)
         {
             Debug.Log("WWW Ok!: " + www.text);
-        }
-        else
+			PlayerData data = JsonUtility.FromJson<PlayerData>(www.text);
+			TargetPlayer.data = data;
+			Debug.Log("");
+		}
+		else
         {
             Debug.Log("WWW Error: " + www.error);
         }
+		waitingResponse = false;
     }
 
     private IEnumerator GetAllPositions(MapCoordinates coordinates)
     {
-        WWW www = new WWW("https://ngjunction2016.azurewebsites.net/api/HttpTriggerJS1?code=rVbhaoGvX5L/WNnJQEmMpkPiRNrFykb7aiDBEpF0qv7W4xAE9adbQQ==&playerId=" + playerId + "&latitude=" + coordinates.Latitude + "&longitude=" + coordinates.Longitude + "&accuracy=" + coordinates.Accuracy);
+		waitingResponse = true;
+        WWW www = new WWW("https://ngjunction2016.azurewebsites.net/api/HttpTriggerJS1?playerId=" + playerId + "&latitude=" + coordinates.Latitude + "&longitude=" + coordinates.Longitude + "&accuracy=" + coordinates.Accuracy);
 
         yield return www;
 
@@ -82,14 +95,24 @@ public class GameManager : MonoBehaviour
         if (www.error == null)
         {
             Debug.Log("WWW Ok!: " + www.text);
+			JsonData data = JsonUtility.FromJson<JsonData>(www.text);
+			players.Clear();
+			for (int i = 0; i < data.players.Length; i++)
+			{
+				players.Add(data.players[i]);
+			}
+
+			SetTargetPlayer();
+			Debug.Log("");
         }
         else
         {
             Debug.Log("WWW Error: " + www.error);
         }
-    }
+		waitingResponse = false;
+	}
 
-    public float GetDistanceBetweenPlayers(PlayerVisualizer playerA, PlayerVisualizer playerB)
+	public float GetDistanceBetweenPlayers(PlayerVisualizer playerA, PlayerVisualizer playerB)
     {
         return (new Vector2(playerA.UnityCoords.X, playerA.UnityCoords.Y) - new Vector2(playerB.UnityCoords.X, playerB.UnityCoords.Y)).magnitude;
     }
@@ -104,8 +127,8 @@ public class GameManager : MonoBehaviour
         {
             do
             {
-                TargetPlayer = players[Random.Range(0, players.Count)];
-            } while (TargetPlayer == LocalPlayer);
+                TargetPlayer.data = players[Random.Range(0, players.Count)];
+            } while (TargetPlayer.data.id == playerId);
         }
         TargetPlayer.Visible = true;
     }
@@ -128,7 +151,22 @@ public class GameManager : MonoBehaviour
 		
 		return positionString;
 #else
-        return "Editor";
+        return "60.16563;24.96732;1";
 #endif
     }
+
+	public bool Attacked()
+	{
+		float distanceToTarget = GetDistanceBetweenPlayers(LocalPlayer, TargetPlayer);
+		return (distanceToTarget <= HitDistance);
+	}
+
+	public void OnAttackClicked()
+	{
+		Debug.Log("Attack clicked");
+		if (Attacked())
+		{
+
+		}
+	}
 }

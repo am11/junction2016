@@ -6,6 +6,7 @@ public class PlayerVisualizer : MonoBehaviour
     public UnityCoordinates UnityCoords;
     public bool Visible;
     public SpriteRenderer spriteRenderer;
+	public PlayerData data;
     // Use this for initialization
     void Start()
     {
@@ -20,6 +21,7 @@ public class PlayerVisualizer : MonoBehaviour
 
     internal void UpdatePosition()
     {
+		MapCoords = new MapCoordinates(data.latitude, data.longitude);
         UnityCoords = CoordinateHelpers.MapCoordinatesToUnity(MapCoords);
         transform.position = new Vector3(UnityCoords.X, 1f, UnityCoords.Y);
     }
