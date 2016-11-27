@@ -106,6 +106,10 @@ public class GameManager : MonoBehaviour
             Debug.Log("WWW Ok!: " + www.text);
 			PlayerData data = JsonUtility.FromJson<PlayerData>(www.text);
 			TargetPlayer.data = data;
+			if (data.attacked)
+			{
+				StartCoroutine(ShowShootResult(false));
+			}
 			Debug.Log("");
 		}
 		else
@@ -213,7 +217,7 @@ public class GameManager : MonoBehaviour
 	IEnumerator ShowShootResult(bool hit)
 	{
 		HitImage.gameObject.SetActive(true);
-		HitImage.sprite = hit ? Hit : Miss;
+		HitImage.sprite = hit ? Hit : YouWereKilled;
 		yield return new WaitForSeconds(2);
 		HitImage.gameObject.SetActive(false);
 	}
