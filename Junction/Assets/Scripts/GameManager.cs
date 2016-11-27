@@ -16,8 +16,13 @@ public class GameManager : MonoBehaviour
     public string targetId;
 	public bool waitingResponse;
 	public float HitDistance = 2.0f;
-    // Use this for initialization
-    void Start()
+	public Image reloadImage;
+	public Sprite Reloading, Reloaded;
+	public float ReloadTimer;
+	public float CurrentReloadTimer;
+	public bool reloaded;
+	// Use this for initialization
+	void Start()
     {
 		if (PlayerPrefs.HasKey("JunctionPlayerID"))
 		{
@@ -35,11 +40,22 @@ public class GameManager : MonoBehaviour
 		}
 
 		ownPositionTimer = ownPositionFrequency;
+		reloaded = true;
     }
 
     // Update is called once per frame
     void Update()
     {
+		if (CurrentReloadTimer < ReloadTimer && !reloaded)
+		{
+			CurrentReloadTimer += Time.deltaTime;
+		}
+		else
+		{
+			Reload();
+			CurrentReloadTimer = 0;
+		}
+
         TargetPlayer.UpdatePosition();
         if (ownPositionTimer <= 0)
         {
@@ -64,6 +80,10 @@ public class GameManager : MonoBehaviour
 				StartCoroutine(GetOpponentPosition(coordinates));
 			}
         }
+		if (Input.GetMouseButtonDown(0))
+		{
+			Tapped();
+		}
     }
 
     private IEnumerator GetOpponentPosition(MapCoordinates coordinates)
@@ -90,10 +110,10 @@ public class GameManager : MonoBehaviour
 		waitingResponse = false;
     }
 
-    private IEnumerator GetAllPositions(MapCoordinates coordinates)
+    private IEnumerator GetAllPositions(MapCoordinates coordinates, bool attackedOpponent = false)
     {
 		waitingResponse = true;
-        WWW www = new WWW("https://ngjunction2016.azurewebsites.net/api/HttpTriggerJS1?playerId=" + playerId + "&latitude=" + coordinates.Latitude + "&longitude=" + coordinates.Longitude + "&accuracy=" + coordinates.Accuracy);
+        WWW www = new WWW("https://ngjunction2016.azurewebsites.net/api/HttpTriggerJS1?playerId=" + playerId + "&latitude=" + coordinates.Latitude + "&longitude=" + coordinates.Longitude + "&accuracy=" + coordinates.Accuracy + (attackedOpponent ? "&opponentAttackedId=" + TargetPlayer.data.id : ""));
 
         yield return www;
 
@@ -167,12 +187,21 @@ public class GameManager : MonoBehaviour
 		return (distanceToTarget <= HitDistance);
 	}
 
-	public void OnAttackClicked()
+	public void Tapped()
 	{
 		Debug.Log("Attack clicked");
+		reloadImage.sprite = Reloading;
+		reloaded = false;
 		if (Attacked())
 		{
-
+			StartCoroutine(GetAllPositions(new MapCoordinates(LocalPlayer.data.latitude,LocalPlayer.data.longitude), true));
 		}
+
+	}
+
+	public void Reload()
+	{
+		reloadImage.sprite = Reloaded;
+		reloaded = true;
 	}
 }
