@@ -10,13 +10,13 @@ public class PlayerVisualizer : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        Visible = false;
+        Visible = true;
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     void Update()
     {
-        spriteRenderer.enabled = Visible;
+        spriteRenderer.enabled = true;
     }
 
     internal void UpdatePosition()

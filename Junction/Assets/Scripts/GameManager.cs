@@ -19,10 +19,19 @@ public class GameManager : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        playerId = System.Guid.NewGuid().ToString();
+		if (PlayerPrefs.HasKey("JunctionPlayerID"))
+		{
+			playerId = PlayerPrefs.GetString("JunctionPlayerID");
+		}
+		else
+		{
+			playerId = System.Guid.NewGuid().ToString();
+			PlayerPrefs.SetString("JunctionPlayerID", playerId);
+		}
+        
 		if (!waitingResponse)
 		{
-			StartCoroutine(GetAllPositions(new MapCoordinates(0f,0f)));
+			StartCoroutine(GetAllPositions(MapCoordinates.ToMapCoordinates(GetPosition())));
 		}
 
 		ownPositionTimer = ownPositionFrequency;
@@ -41,29 +50,26 @@ public class GameManager : MonoBehaviour
         {
             ownPositionTimer -= Time.deltaTime;
         }
-
-#if UNITY_ANDROID || !UNITY_EDITOR
+		
         MapCoordinates coordinates = MapCoordinates.ToMapCoordinates(GetPosition());
-
-        DebugText.text = coordinates.ToString();
+		LocalPlayer.data.latitude = coordinates.Latitude;
+		LocalPlayer.data.longitude = coordinates.Longitude;
+		DebugText.text = coordinates.ToString();
 
         if (Time.time > nextActionTime)
         {
             nextActionTime = Time.time + period;
-			if (!waitingResponse)
+			if (!waitingResponse && !string.IsNullOrEmpty(TargetPlayer.data.id))
 			{
 				StartCoroutine(GetOpponentPosition(coordinates));
 			}
         }
-#else
-        DebugText.text = GetPosition();
-#endif
     }
 
     private IEnumerator GetOpponentPosition(MapCoordinates coordinates)
     {
 		waitingResponse = true;
-		string url = "https://ngjunction2016.azurewebsites.net/api/HttpTriggerJS1?playerId=" + playerId + "&latitude=" + coordinates.Latitude + "&longitude=" + coordinates.Longitude + "&accuracy=" + coordinates.Accuracy + "&opponentId=" + targetId;
+		string url = "https://ngjunction2016.azurewebsites.net/api/HttpTriggerJS1?playerId=" + playerId + "&latitude=" + coordinates.Latitude + "&longitude=" + coordinates.Longitude + "&accuracy=" + coordinates.Accuracy + "&opponentId=" + TargetPlayer.data.id;
 
 		WWW www = new WWW(url);
 
@@ -138,7 +144,7 @@ public class GameManager : MonoBehaviour
         LocalPlayer.UpdatePosition();
         LocalPlayer.Visible = true;
         yield return new WaitForSeconds(2);
-        LocalPlayer.Visible = false;
+        LocalPlayer.Visible = true;
     }
 
     public string GetPosition()
