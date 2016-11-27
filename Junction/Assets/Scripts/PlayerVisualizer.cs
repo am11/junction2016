@@ -21,6 +21,6 @@ public class PlayerVisualizer : MonoBehaviour
     internal void UpdatePosition()
     {
         UnityCoords = CoordinateHelpers.MapCoordinatesToUnity(MapCoords);
-        transform.position = new Vector3(UnityCoords.X, 0f, UnityCoords.Y);
+        transform.position = new Vector3(UnityCoords.X, 1f, UnityCoords.Y);
     }
 }
