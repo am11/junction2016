@@ -15,12 +15,14 @@ public class GameManager : MonoBehaviour
     public string playerId;
     public string targetId;
 	public bool waitingResponse;
-	public float HitDistance = 2.0f;
+	public float HitDistance = 1.0f;
 	public Image reloadImage;
 	public Sprite Reloading, Reloaded;
 	public float ReloadTimer;
 	public float CurrentReloadTimer;
 	public bool reloaded;
+	public Image HitImage;
+	public Sprite Hit, Miss, YouWereKilled;
 	// Use this for initialization
 	void Start()
     {
@@ -33,11 +35,14 @@ public class GameManager : MonoBehaviour
 			playerId = System.Guid.NewGuid().ToString();
 			PlayerPrefs.SetString("JunctionPlayerID", playerId);
 		}
-        
+		Debug.Log("GameManger:Start, calling GetAllPositions");
 		if (!waitingResponse)
 		{
+			Debug.Log("GameManger:Start, calling GetAllPositions, waitingResponse = false");
+
 			StartCoroutine(GetAllPositions(MapCoordinates.ToMapCoordinates(GetPosition())));
 		}
+		Debug.Log("GameManger:Start, called getallpositions");
 
 		ownPositionTimer = ownPositionFrequency;
 		reloaded = true;
@@ -112,11 +117,12 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator GetAllPositions(MapCoordinates coordinates, bool attackedOpponent = false)
     {
+		Debug.Log("GetAllPositionsStarted");
 		waitingResponse = true;
         WWW www = new WWW("https://ngjunction2016.azurewebsites.net/api/HttpTriggerJS1?playerId=" + playerId + "&latitude=" + coordinates.Latitude + "&longitude=" + coordinates.Longitude + "&accuracy=" + coordinates.Accuracy + (attackedOpponent ? "&opponentAttackedId=" + TargetPlayer.data.id : ""));
-
-        yield return www;
-
+		Debug.Log("request URL:" +www.url);
+		yield return www;
+		Debug.Log("Request Done!");
         // check for errors
         if (www.error == null)
         {
@@ -184,6 +190,7 @@ public class GameManager : MonoBehaviour
 	public bool Attacked()
 	{
 		float distanceToTarget = GetDistanceBetweenPlayers(LocalPlayer, TargetPlayer);
+		Debug.Log("Distance to target: " + distanceToTarget);
 		return (distanceToTarget <= HitDistance);
 	}
 
@@ -192,11 +199,23 @@ public class GameManager : MonoBehaviour
 		Debug.Log("Attack clicked");
 		reloadImage.sprite = Reloading;
 		reloaded = false;
-		if (Attacked())
+		bool hit = Attacked();
+		if (hit)
 		{
+			Debug.Log("Target killed");
+
 			StartCoroutine(GetAllPositions(new MapCoordinates(LocalPlayer.data.latitude,LocalPlayer.data.longitude), true));
 		}
+		StartCoroutine(ShowShootResult(hit));
 
+	}
+
+	IEnumerator ShowShootResult(bool hit)
+	{
+		HitImage.gameObject.SetActive(true);
+		HitImage.sprite = hit ? Hit : Miss;
+		yield return new WaitForSeconds(2);
+		HitImage.gameObject.SetActive(false);
 	}
 
 	public void Reload()
